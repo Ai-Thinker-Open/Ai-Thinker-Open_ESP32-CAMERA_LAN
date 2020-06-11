@@ -24,12 +24,20 @@
 #include "esp_camera.h"
 #include "app_camera.h"
 #include "sdkconfig.h"
-
+#include "nvs_flash.h"
 
 static const char *TAG = "app_camera";
 
 void app_camera_main ()
 {
+
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
 #if CONFIG_CAMERA_MODEL_ESP_EYE || CONFIG_CAMERA_MODEL_ESP32_CAM_BOARD
     /* IO13, IO14 is designed for JTAG by default,
      * to use it as generalized input,
@@ -94,12 +102,12 @@ void app_camera_main ()
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
-    config.xclk_freq_hz = 20000000;
+    config.xclk_freq_hz = 20000000;// 2 20000000
     config.pixel_format = PIXFORMAT_JPEG;
     //init with high specs to pre-allocate larger buffers
     config.frame_size = FRAMESIZE_QSXGA;
     config.jpeg_quality = 10;
-    config.fb_count = 2;
+    config.fb_count = 8;// 2 2
 
     // camera init
     esp_err_t err = esp_camera_init(&config);

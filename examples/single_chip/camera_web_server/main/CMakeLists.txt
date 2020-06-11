@@ -1,4 +1,4 @@
-set(COMPONENT_SRCS "app_main.c" "app_wifi.c" "app_camera.c" "app_httpd.c" "app_mdns.c")
+set(COMPONENT_SRCS "app_main.c" "app_smart_wifi.c" "app_camera.c" "app_httpd.c" "app_mdns.c" "app_sd.c" "app_uart.c" "app_uart.c" "app_at.c")
 set(COMPONENT_ADD_INCLUDEDIRS "include")
 
 set(COMPONENT_REQUIRES

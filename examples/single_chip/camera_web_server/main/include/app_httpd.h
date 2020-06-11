@@ -1,3 +1,4 @@
+
 // Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +18,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+typedef signed char int8_t;
 void app_httpd_main();
-
+#if 0
+int8_t e_save_face_id_to_flash(void);
+int8_t e_delete_face_id_in_flash(void);
+int8_t e_read_face_id_from_flash(uint8_t sv_id_num,uint8_t cf_times);
+#endif
 #ifdef __cplusplus
 }
 #endif

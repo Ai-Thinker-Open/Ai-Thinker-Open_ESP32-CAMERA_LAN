@@ -22,6 +22,13 @@
 #include "sdkconfig.h"
 #include "app_mdns.h"
 #include "app_camera.h"
+#include "app_sd.h"
+
+
+#include "fr_flash.h"
+#include "esp_partition.h"
+#include "app_board.h"// 2
+#include <time.h> // 2
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -229,7 +236,128 @@ static void draw_face_boxes(dl_matrix3du_t *image_matrix, box_array_t *boxes, in
 #endif
     }
 }
+#if 0
 
+static int8_t save_face_id_to_flash_name(face_id_name_list *id_list,char * name )
+{
+    if(0==l->count){
+        ESP_LOGE(TAG, "list is empty");
+        return -3;
+    }
+    // left_sample == 0
+    const esp_partition_t *pt = esp_partition_find_first(FR_FLASH_TYPE, FR_FLASH_SUBTYPE, FR_FLASH_PARTITION_NAME);
+    if (pt == NULL){
+        ESP_LOGE(TAG, "Not found");
+        return -2;
+    }
+
+    uint8_t enroll_id_idx = l->count - 1;
+
+    // flash can only be erased divided by 4K
+    const int block_len = FACE_ID_SIZE * sizeof(float);
+    const int block_num = (4096 + block_len - 1) / block_len;
+
+    if(enroll_id_idx % block_num == 0)
+    {
+        // save the other block TODO: if block != 2
+        esp_partition_erase_range(pt, 4096 + enroll_id_idx * block_len, 4096);
+
+        esp_partition_write(pt, 4096 + enroll_id_idx * block_len, l->tail->id_vec->item, block_len);
+    }
+    else
+    {
+        // save the other block TODO: if block != 2
+        float *backup_buf = (float *)dl_lib_calloc(1, block_len, 0);
+        esp_partition_read(pt, 4096 + (enroll_id_idx - 1) * block_len, backup_buf, block_len);
+
+        esp_partition_erase_range(pt, 4096 + (enroll_id_idx - 1) * block_len, 4096);
+
+        esp_partition_write(pt, 4096 + (enroll_id_idx - 1) * block_len, backup_buf, block_len);
+        esp_partition_write(pt, 4096 + enroll_id_idx * block_len, l->tail->id_vec->item, block_len); 
+        dl_lib_free(backup_buf);
+    }
+
+    const int name_len = ENROLL_NAME_LEN * sizeof(char);
+    char *backup_name = (char *)dl_lib_calloc(l->count, name_len, 0);
+    esp_partition_read(pt, sizeof(int) + sizeof(uint8_t), backup_name, name_len * (l->count - 1));
+    memcpy(backup_name + (l->count - 1) * name_len, l->tail->id_name, name_len);
+    esp_partition_erase_range(pt, 0, 4096);
+    int flash_info_flag = FR_FLASH_INFO_FLAG;
+    esp_partition_write(pt, 0, &flash_info_flag, sizeof(int));
+    esp_partition_write(pt, sizeof(int), &l->count, sizeof(uint8_t));
+    esp_partition_write(pt, sizeof(int) + sizeof(uint8_t), backup_name, name_len * l->count);
+    dl_lib_free(backup_name);
+
+    return 0;
+    }
+static int8_t save_face_id_to_flash(face_id_name_list *id_list)
+{
+        if(0==id_list->count){
+            ESP_LOGE(TAG, "list is empty");
+            return -3;
+        }
+        const esp_partition_t *pt = esp_partition_find_first(FR_FLASH_TYPE, FR_FLASH_SUBTYPE, FR_FLASH_PARTITION_NAME);
+        if (pt == NULL){
+            ESP_LOGE(TAG, "Not found");
+        return -2;
+        }
+
+            const int block_len = FACE_ID_SIZE * sizeof(float);
+            const int block_num = (4096 + block_len - 1) / block_len;
+            float *backup_buf = (float *)dl_lib_calloc(1, block_len, 0);
+            int flash_info_flag = FR_FLASH_INFO_FLAG;
+            uint8_t enroll_id_idx = id_list->tail == 0 ? (id_list->size - 1) : (id_list->tail - 1) % id_list->size;
+
+            if(enroll_id_idx % block_num == 0)
+            {
+                // save the other block TODO: if block != 2
+                esp_partition_read(pt, 4096 + (enroll_id_idx + 1) * block_len, backup_buf, block_len);
+
+                esp_partition_erase_range(pt, 4096 + enroll_id_idx * block_len, 4096);
+
+                esp_partition_write(pt, 4096 + enroll_id_idx * block_len, id_list->id_list[enroll_id_idx]->item, block_len);
+                esp_partition_write(pt, 4096 + (enroll_id_idx + 1) * block_len, backup_buf, block_len); 
+            }
+            else
+            {
+                // save the other block TODO: if block != 2
+                esp_partition_read(pt, 4096 + (enroll_id_idx - 1) * block_len, backup_buf, block_len);
+
+                esp_partition_erase_range(pt, 4096 + (enroll_id_idx - 1) * block_len, 4096);
+
+                esp_partition_write(pt, 4096 + (enroll_id_idx - 1) * block_len, backup_buf, block_len);
+                esp_partition_write(pt, 4096 + enroll_id_idx * block_len, id_list->id_list[enroll_id_idx]->item, block_len); 
+            }
+            dl_lib_free(backup_buf);
+
+            esp_partition_erase_range(pt, 0, 4096);
+            esp_partition_write(pt, 0, &flash_info_flag, sizeof(int));
+            esp_partition_write(pt, sizeof(int), id_list, sizeof(face_id_name_list));
+        return 0;
+}
+int8_t e_save_face_id_to_flash(void)
+{
+        if(0)
+            return save_face_id_to_flash_name(&id_list,NULL);
+        else        
+            return save_face_id_to_flash(&id_list);
+}
+
+int8_t e_delete_face_id_in_flash(void)
+{
+        return delete_face_id_in_flash(&id_list);
+}
+int8_t e_read_face_id_from_flash(uint8_t sv_id_num,uint8_t cf_times)
+{
+	uint8_t sv_id_num_t=sv_id_num&0x0f;
+	uint8_t cf_times_t=cf_times&0xff;
+	
+	while(delete_face(&id_list));
+	face_id_init(&id_list, sv_id_num_t, cf_times_t);
+
+    	return read_face_id_from_flash(&id_list);
+}
+#endif
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
 static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_boxes)
 {
@@ -246,18 +374,20 @@ static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_b
     {
         if (is_enrolling == 1)
         {
-            int8_t left_sample_face = enroll_face(&id_list, aligned_face);
+            int8_t left_sample_face;
+
+            left_sample_face = enroll_face(&id_list, aligned_face);
 
             if (left_sample_face == (ENROLL_CONFIRM_TIMES - 1))
             {
-                ESP_LOGD(TAG, "Enrolling Face ID: %d", id_list.tail);
+                ESP_LOGI(TAG, "Enrolling Face ID: %d", id_list.tail);// 2
             }
-            ESP_LOGD(TAG, "Enrolling Face ID: %d sample %d", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
+            ESP_LOGI(TAG, "Enrolling Face ID: %d sample %d", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
             rgb_printf(image_matrix, FACE_COLOR_CYAN, "ID[%u] Sample[%u]", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
             if (left_sample_face == 0)
             {
                 is_enrolling = 0;
-                ESP_LOGD(TAG, "Enrolled Face ID: %d", id_list.tail);
+                ESP_LOGI(TAG, "Enrolled Face ID: %d", id_list.tail);
             }
         }
         else
@@ -439,7 +569,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
     return res;
 #endif
 }
-
+extern int test_flag; 
 static esp_err_t stream_handler(httpd_req_t *req)
 {
     camera_fb_t *fb = NULL;
@@ -485,7 +615,6 @@ static esp_err_t stream_handler(httpd_req_t *req)
         detected = false;
         face_id = 0;
 #endif
-
         fb = esp_camera_fb_get();
         if (!fb)
         {
@@ -626,7 +755,6 @@ static esp_err_t stream_handler(httpd_req_t *req)
             break;
         }
         int64_t fr_end = esp_timer_get_time();
-
 #if CONFIG_ESP_FACE_DETECT_ENABLED
         int64_t ready_time = (fr_ready - fr_start) / 1000;
         int64_t face_time = (fr_face - fr_ready) / 1000;
@@ -639,6 +767,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
         last_frame = fr_end;
         frame_time /= 1000;
         uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
+
         ESP_LOGI(TAG, "MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
 #if CONFIG_ESP_FACE_DETECT_ENABLED
                       ", %u+%u+%u+%u=%u %s%d"
@@ -653,7 +782,9 @@ static esp_err_t stream_handler(httpd_req_t *req)
                  (detected) ? "DETECTED " : "", face_id
 #endif
         );
-    }
+        //ESP_LOGD(TAG, "Free heap: %u", xPortGetFreeHeapSize());
+
+        }
 
 #ifdef CONFIG_LED_ILLUMINATOR_ENABLED
     isStreaming = false;
@@ -708,7 +839,7 @@ static esp_err_t cmd_handler(httpd_req_t *req)
 
     if (!strcmp(variable, "framesize")) {
         if (s->pixformat == PIXFORMAT_JPEG) {
-            res = s->set_framesize(s, (framesize_t)val);
+            res = s->set_framesize(s, (framesize_t)val);//set_framesize
             if (res == 0) {
                 app_mdns_update_framesize(val);
             }
@@ -1016,7 +1147,8 @@ static esp_err_t pll_handler(httpd_req_t *req)
     ESP_LOGI(TAG, "Set Pll: bypass: %d, mul: %d, sys: %d, root: %d, pre: %d, seld5: %d, pclken: %d, pclk: %d", bypass, mul, sys, root, pre, seld5, pclken, pclk);
     sensor_t *s = esp_camera_sensor_get();
     int res = s->set_pll(s, bypass, mul, sys, root, pre, seld5, pclken, pclk);
-    if (res) {
+	ESP_LOGI(TAG, "111111111111%d",res);
+	if (res) {
         return httpd_resp_send_500(req);
     }
 
@@ -1146,7 +1278,7 @@ void app_httpd_main()
         .method = HTTP_GET,
         .handler = reg_handler,
         .user_ctx = NULL};
-
+#if 1
     httpd_uri_t greg_uri = {
         .uri = "/greg",
         .method = HTTP_GET,
@@ -1164,7 +1296,7 @@ void app_httpd_main()
         .method = HTTP_GET,
         .handler = win_handler,
         .user_ctx = NULL};
-
+#endif
     httpd_uri_t mdns_uri = {
         .uri = "/mdns",
         .method = HTTP_GET,
@@ -1181,7 +1313,7 @@ void app_httpd_main()
 
 #if CONFIG_ESP_FACE_DETECT_ENABLED
 
-#if CONFIG_ESP_FACE_DETECT_MTMN
+#if CONFIG_ESP_FACE_DETECT_MTMN 
     mtmn_config.type = FAST;
     mtmn_config.min_face = 80;
     mtmn_config.pyramid = 0.707;
@@ -1203,6 +1335,8 @@ void app_httpd_main()
 
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
     face_id_init(&id_list, FACE_ID_SAVE_NUMBER, ENROLL_CONFIRM_TIMES);
+
+    //read_face_id_from_flash(&id_list);
 #endif
 
 #endif
@@ -1216,10 +1350,11 @@ void app_httpd_main()
 
         httpd_register_uri_handler(camera_httpd, &xclk_uri);
         httpd_register_uri_handler(camera_httpd, &reg_uri);
+#if 1
         httpd_register_uri_handler(camera_httpd, &greg_uri);
         httpd_register_uri_handler(camera_httpd, &pll_uri);
         httpd_register_uri_handler(camera_httpd, &win_uri);
-
+#endif 
         httpd_register_uri_handler(camera_httpd, &mdns_uri);
         httpd_register_uri_handler(camera_httpd, &monitor_uri);
     }

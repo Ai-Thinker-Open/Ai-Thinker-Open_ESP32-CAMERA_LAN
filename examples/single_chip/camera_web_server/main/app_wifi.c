@@ -27,7 +27,6 @@
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
-#include "nvs_flash.h"
 #include "sdkconfig.h"
 
 #include "lwip/err.h"
@@ -126,7 +125,8 @@ void wifi_init_softap()
     ESP_LOGI(TAG, "wifi_init_softap finished.SSID:%s password:%s",
              EXAMPLE_ESP_WIFI_AP_SSID, EXAMPLE_ESP_WIFI_AP_PASS);
 }
-
+//extern char SSID_NAME[32];
+//extern char SSID_PASSWD[64];
 void wifi_init_sta()
 {
     wifi_config_t wifi_config;
@@ -137,15 +137,14 @@ void wifi_init_sta()
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
 
     ESP_LOGI(TAG, "wifi_init_sta finished.");
-    ESP_LOGI(TAG, "connect to ap SSID:%s password:%s",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+    ESP_LOGI(TAG, "connect to ap SSID:|%s| password:|%s|", EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+             //SSID_NAME, SSID_PASSWD);
 }
 
 void app_wifi_main()
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     wifi_mode_t mode = WIFI_MODE_NULL;
-
     if (strlen(EXAMPLE_ESP_WIFI_AP_SSID) && strlen(EXAMPLE_ESP_WIFI_SSID)) {
         mode = WIFI_MODE_APSTA;
     } else if (strlen(EXAMPLE_ESP_WIFI_AP_SSID)) {
@@ -154,12 +153,6 @@ void app_wifi_main()
         mode = WIFI_MODE_STA;
     }
 
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
 
     if (mode == WIFI_MODE_NULL) {
         ESP_LOGW(TAG,"Neither AP or STA have been configured. WiFi will be off.");

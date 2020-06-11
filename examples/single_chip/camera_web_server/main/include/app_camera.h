@@ -126,7 +126,7 @@
 
 #elif CONFIG_CAMERA_MODEL_AI_THINKER
 #define CAM_BOARD         "AI-THINKER"
-#define PWDN_GPIO_NUM     32
+#define PWDN_GPIO_NUM    32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
 #define SIOD_GPIO_NUM     26
@@ -165,7 +165,6 @@
 #define HREF_GPIO_NUM     CONFIG_CAMERA_PIN_HREF
 #define PCLK_GPIO_NUM     CONFIG_CAMERA_PIN_PCLK
 #endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

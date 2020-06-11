@@ -288,3 +288,12 @@ config ESP_FACE_RECOGNITION_ENABLED
         Enables ESP-WHO Face Recognition through the web interface.
 
 endmenu
+
+menu "SdCard storage"
+config ESP_SDCARD_STORAGE_ENABLED
+    bool "SdCard storage"
+    default n
+    help
+        Enables SdCard storage feature will automatically store camera data locally .
+		
+endmenu

@@ -52,21 +52,21 @@ static void mdns_query_for_cams()
         ESP_LOGE(TAG, "MDNS Query Failed: %s", esp_err_to_name(err));
         return;
     }
-	xSemaphoreTake(query_lock, portMAX_DELAY);
+    xSemaphoreTake(query_lock, portMAX_DELAY);
     if (found_cams != NULL) {
-    	mdns_query_results_free(found_cams);
+        mdns_query_results_free(found_cams);
     }
-	found_cams = new_cams;
-	xSemaphoreGive(query_lock);
+    found_cams = new_cams;
+    xSemaphoreGive(query_lock);
 }
 
 static void mdns_task(void * arg)
 {
-	for (;;) {
-		mdns_query_for_cams();
-		//delay 55 seconds
-		vTaskDelay((55 * 1000) / portTICK_PERIOD_MS);
-	}
+    for (;;) {
+        mdns_query_for_cams();
+        //delay 55 seconds
+        vTaskDelay((55 * 1000) / portTICK_PERIOD_MS);
+    }
     vTaskDelete(NULL);
 }
 
@@ -178,9 +178,6 @@ void app_mdns_main()
 	xSemaphoreGive(query_lock);
 
     sensor_t * s = esp_camera_sensor_get();
-    if(s == NULL){
-        return;
-    }
     switch(s->id.PID){
         case OV2640_PID: model = "OV2640"; break;
         case OV3660_PID: model = "OV3660"; break;
@@ -204,11 +201,11 @@ void app_mdns_main()
 
     char * src = iname, * dst = hname, c;
     while (*src) {
-    	c = *src++;
-    	if (c >= 'A' && c <= 'Z') {
-    		c -= 'A' - 'a';
-    	}
-    	*dst++ = c;
+        c = *src++;
+        if (c >= 'A' && c <= 'Z') {
+        c -= 'A' - 'a';
+        }
+        *dst++ = c;
     }
     *dst++ = '\0';
 
@@ -247,4 +244,5 @@ void app_mdns_main()
     }
 
     xTaskCreate(mdns_task, "mdns-cam", 2048, NULL, 2, NULL);
+    ESP_LOGI("base MAC address", "%02X:%02X:%02X:%02X:%02X:%02X",mac[0], mac[1], mac[2],mac[3], mac[4], mac[5]);
 }
