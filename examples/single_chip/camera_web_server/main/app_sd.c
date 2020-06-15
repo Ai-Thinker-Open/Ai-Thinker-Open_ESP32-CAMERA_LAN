@@ -51,17 +51,17 @@ QueueHandle_t sd_ready;
 void sd_write(const char *_jpg_buf, int _jpg_buf_len)
 {
 
-#if 0
-    // Use POSIX and C standard library functions to work with files.
+   // Use POSIX and C standard library functions to work with files.
     // First create a file.
     ESP_LOGI(TAG, "Opening file");
-    f = fopen("/sdcard/hello.txt", "a");
+    FILE* f = fopen("/sdcard/hello.txt", "w");
     if (f == NULL) {
         ESP_LOGE(TAG, "Failed to open file for writing");
         return;
     }
-
-
+    fprintf(f, "Hello file IO  %s!\n", card->cid.name);
+    fclose(f);
+    ESP_LOGI(TAG, "File written");
 
     // Check if destination file exists before renaming
     struct stat st;
@@ -69,18 +69,43 @@ void sd_write(const char *_jpg_buf, int _jpg_buf_len)
         // Delete it if it exists
         unlink("/sdcard/foo.txt");
     }
-    
-    fclose(f);
-    ESP_LOGI(TAG, "File written");
-#endif
 
+    // Rename original file
+    ESP_LOGI(TAG, "Renaming file");
+    if (rename("/sdcard/hello.txt", "/sdcard/foo.txt") != 0) {
+        ESP_LOGE(TAG, "Rename failed");
+        return;
+    }
+
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+    f = fopen("/sdcard/foo.txt", "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line[64];
+    fgets(line, sizeof(line), f);
+    fclose(f);
+    // strip newline
+    char* pos = strchr(line, '\n');
+    if (pos) {
+        *pos = '\0';
+    }
+    ESP_LOGI(TAG, "Read from file: '%s'", line);
+
+    // All done, unmount partition and disable SDMMC or SPI peripheral
+    //esp_vfs_fat_sdmmc_unmount();
+    //ESP_LOGI(TAG, "Card unmounted");
 }
 
 static void Sdcard_task(void *pvParameters)
 {
 
         while (true){
-            vTaskDelay((500) / portTICK_PERIOD_MS);
+
+            //ESP_LOGW(TAG, "%d: - monitor left %dKB", __LINE__, esp_get_free_heap_size()/1024);
+            vTaskDelay((5*1000) / portTICK_PERIOD_MS);
         }
      vTaskDelete(NULL);
 }
@@ -164,14 +189,8 @@ void SdCard_init(void)
     strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
     ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
     }
-#if 0//CONFIG_ESP_SDCARD_STORAGE_ENABLED
-    sd_ready = xQueueCreate(4, sizeof(sd_buf *));
-    if (sd_ready == NULL) {
-        ESP_LOGE(TAG, "Failed to sd queue");
-       return ;
-    }
-#endif
+
 #if CONFIG_ESP_SDCARD_STORAGE_ENABLED
-    //xTaskCreate(&Sdcard_task, "Sdcard_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&Sdcard_task, "Sdcard_task", 4096, NULL, 5, NULL);
 #endif
 }

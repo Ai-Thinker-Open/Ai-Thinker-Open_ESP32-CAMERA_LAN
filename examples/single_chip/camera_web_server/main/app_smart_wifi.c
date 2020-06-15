@@ -81,7 +81,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 }
 void time_sync_notification_cb(struct timeval *tv)
 {
-    //ESP_LOGI(TAG, "Notification of a time synchronization event");
+    ESP_LOGI(TAG, "SNTP OK ");
 }
 static void initialize_sntp(void)
 {

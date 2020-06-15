@@ -111,9 +111,10 @@ static void uart_event_task(void *arg)
                     ESP_LOGI(TAG, "uart event type: %d", event.type);
                     break;
             }
-		      ESP_LOGD(TAG, "uart stack : %d", uxTaskGetStackHighWaterMark(NULL));
+                ESP_LOGD(TAG, "uart stack : %d", uxTaskGetStackHighWaterMark(NULL));
         }
-		
+
+    //ESP_LOGI(TAG, "Free heap: %u", xPortGetFreeHeapSize());
     }
     free(dtmp);
     dtmp = NULL;

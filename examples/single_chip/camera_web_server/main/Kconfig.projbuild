@@ -287,6 +287,14 @@ config ESP_FACE_RECOGNITION_ENABLED
     help
         Enables ESP-WHO Face Recognition through the web interface.
 
+menu "VERSION"
+config ESP_CAM_VERSION
+    string "esp_cam version"
+    default ""
+    help
+    Set the SDk software version number.
+endmenu
+
 endmenu
 
 menu "SdCard storage"

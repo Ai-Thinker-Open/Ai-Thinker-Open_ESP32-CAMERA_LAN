@@ -24,7 +24,7 @@
 #include "app_mdns.h"
 #include "app_board.h"
 #include "esp_log.h"
-#define VERSION "1.0.0"
+#include "sdkconfig.h"
 
 void app_main()
 {
@@ -33,6 +33,6 @@ void app_main()
     app_httpd_main();
     app_mdns_main();
 
-    ESP_LOGI("esp-cam", "Version "VERSION);
+    ESP_LOGI("esp-cam Version",CONFIG_ESP_CAM_VERSION);
 
 }
