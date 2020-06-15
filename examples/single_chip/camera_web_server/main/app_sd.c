@@ -24,6 +24,7 @@
 
 #include "app_sd.h"
 #include <time.h>
+#include "sdkconfig.h"
 
 static const char *TAG = "example";
 
@@ -35,7 +36,7 @@ typedef struct {
     SemaphoreHandle_t frame_ready;
     TaskHandle_t dma_filter_task;
 } sd_state_t;
-
+static sdmmc_card_t* card;
 //sd_state_t* sd_state = NULL;
 QueueHandle_t sd_ready;
 #ifdef USE_SPI_MODE
@@ -50,7 +51,6 @@ QueueHandle_t sd_ready;
 
 void sd_write(const char *_jpg_buf, int _jpg_buf_len)
 {
-
    // Use POSIX and C standard library functions to work with files.
     // First create a file.
     ESP_LOGI(TAG, "Opening file");
@@ -95,8 +95,8 @@ void sd_write(const char *_jpg_buf, int _jpg_buf_len)
     ESP_LOGI(TAG, "Read from file: '%s'", line);
 
     // All done, unmount partition and disable SDMMC or SPI peripheral
-    //esp_vfs_fat_sdmmc_unmount();
-    //ESP_LOGI(TAG, "Card unmounted");
+    esp_vfs_fat_sdmmc_unmount();
+    ESP_LOGI(TAG, "Card unmounted");
 }
 
 static void Sdcard_task(void *pvParameters)
@@ -159,7 +159,6 @@ void SdCard_init(void)
     // Note: esp_vfs_fat_sdmmc_mount is an all-in-one convenience function.
     // Please check its source code and implement error recovery when developing
     // production applications.
-    sdmmc_card_t* card;
     esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
     if (ret != ESP_OK) {
@@ -175,6 +174,7 @@ void SdCard_init(void)
 
     // Card has been initialized, print its properties
     sdmmc_card_print_info(stdout, card);
+#if CONFIG_ESP_SNTP_ENABLED
     {
     time_t now;
     char strftime_buf[64];
@@ -189,7 +189,7 @@ void SdCard_init(void)
     strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
     ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
     }
-
+#endif
 #if CONFIG_ESP_SDCARD_STORAGE_ENABLED
     xTaskCreate(&Sdcard_task, "Sdcard_task", 4096, NULL, 5, NULL);
 #endif

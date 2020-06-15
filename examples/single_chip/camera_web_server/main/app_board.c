@@ -28,11 +28,17 @@
 #include "app_sd.h"
 #include "app_smart_wifi.h"
 #include "app_camera.h"
+#include "app_wifi.h"
+#include "sdkconfig.h"
 
   void app_board_main(void)
  {
         app_camera_main();
+#ifdef CONFIG_ESP_SMAERT_CONFIG
         initialise_wifi();
+#else        
+        app_wifi_main();
+#endif
         uart_init();
         SdCard_init();
         

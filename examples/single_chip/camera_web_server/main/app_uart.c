@@ -13,6 +13,7 @@
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "esp_log.h"
+
 static const char *TAG = "uart_events";
 
 /**
@@ -111,10 +112,10 @@ static void uart_event_task(void *arg)
                     ESP_LOGI(TAG, "uart event type: %d", event.type);
                     break;
             }
-                ESP_LOGD(TAG, "uart stack : %d", uxTaskGetStackHighWaterMark(NULL));
+                //ESP_LOGD(TAG, "uart stack : %d", uxTaskGetStackHighWaterMark(NULL));
         }
 
-    //ESP_LOGI(TAG, "Free heap: %u", xPortGetFreeHeapSize());
+    //ESP_LOGI(TAG, "%sFree heap: %u",__func__ ,xPortGetFreeHeapSize());
     }
     free(dtmp);
     dtmp = NULL;

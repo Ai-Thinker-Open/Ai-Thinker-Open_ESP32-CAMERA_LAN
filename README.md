@@ -8,7 +8,7 @@ ESP32-CAM¿É¹ã·ºÓ¦ÓÃÓÚ¸÷ÖÖÎïÁªÍø³¡ºÏ£¬ÊÊÓÃÓÚ¼ÒÍ¥ÖÇÄÜÉè±¸¡¢¹¤ÒµÎÞÏß¿ØÖÆ¡¢ÎÞÏß¼à¿Ø¡
 ESP32-CAM²ÉÓÃDIP·â×°£¬Ö±½Ó²åÉÏµ×°å¼´¿ÉÊ¹ÓÃ£¬ÊµÏÖ²úÆ·µÄ¿ìËÙÉú²ú£¬Îª¿Í»§Ìá¹©¸ß¿É¿¿ÐÔµÄÁ¬½Ó·½Ê½£¬·½±ãÓ¦ÓÃÓÚ¸÷ÖÖÎïÁªÍøÓ²¼þÖÕ¶Ë³¡ºÏ¡£
 Ìå»ý³¬Ð¡µÄ802.11b/g/n Wi-Fi + BT/BLE SoCÄ£¿é¡£
 
-![ ²úÆ·](img / CAM5.jpg)
+![²úÆ·](img/CAM5.jpg)
 
 ÔÚESP_CAMÖÐ£¬¼¯³ÉÁËSDcrad£¬uart£¬SNTP£¬smartconfigµÈ¹¦ÄÜ£¬Ìá¹©ÁË¿ìËÙ¿ª·¢»·¾³£¬½øÐÐÁË¹¦ÄÜÑéÖ¤£¬¼õÉÙ¿ª·¢ÖÜÆÚ¡£
 
@@ -30,7 +30,7 @@ ESP32-CAM²ÉÓÃDIP·â×°£¬Ö±½Ó²åÉÏµ×°å¼´¿ÉÊ¹ÓÃ£¬ÊµÏÖ²úÆ·µÄ¿ìËÙÉú²ú£¬Îª¿Í»§Ìá¹©¸ß¿É¿¿
 * ¶Å°îÏß
 * PC
 * Ó²¼þ½ÓÏß:
-![ uart](img / cam_uart.jpg)
+![uart](img/cam_uart.jpg)
 
 ## Èí¼þ»·¾³
 ### »·¾³´î½¨
@@ -64,7 +64,7 @@ cd esp_cam\examples\single_chip\camera_web_server
 2. ÒÀÕÕ´®¿ÚÄ£¿é½ÓÏß£¬±àÒë²¢Ë¢ÐÂÏîÄ¿
 ```
 make build
-make flash -p [PORT]
+make flash -p [PORT]//Èç¹ûÊ¹ÓÃmenuconfigÅäÖÃµÄÄ¬ÈÏ²ÎÊýÔò²»ÐèÒª¡°-p [PORT]¡±²ÎÊý
 ```
 3. ¸ß¼¶ÓÃ»§¿ÉÒÔÊ¹ÓÃÃüÁîÐÞ¸ÄÄ³Ð©Ñ¡Ïî `make menuconfig`.
 

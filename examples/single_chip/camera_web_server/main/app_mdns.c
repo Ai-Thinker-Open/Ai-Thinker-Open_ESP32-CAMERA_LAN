@@ -64,7 +64,7 @@ static void mdns_task(void * arg)
 {
     for (;;) {
         mdns_query_for_cams();
-        //ESP_LOGI(TAG, "Free heap: %u", xPortGetFreeHeapSize());
+        ESP_LOGI(TAG, "%sFree heap: %u",__func__ ,xPortGetFreeHeapSize());
         //delay 55 seconds
         vTaskDelay((55 * 1000) / portTICK_PERIOD_MS);
     }

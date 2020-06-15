@@ -297,6 +297,8 @@ endmenu
 
 endmenu
 
+menu "board config"
+
 menu "SdCard storage"
 config ESP_SDCARD_STORAGE_ENABLED
     bool "SdCard storage"
@@ -304,4 +306,24 @@ config ESP_SDCARD_STORAGE_ENABLED
     help
         Enables SdCard storage feature will automatically store camera data locally .
 		
+endmenu
+
+menu "wifi sntp updata"
+config ESP_SNTP_ENABLED
+    bool "sntp enabled"
+    default n
+    help
+        Enables sntp.
+		
+endmenu
+
+menu "smart config"
+config ESP_SMAERT_CONFIG
+    bool "smart config enabled"
+    default n
+    help
+        Enables smart config.
+		
+endmenu
+
 endmenu

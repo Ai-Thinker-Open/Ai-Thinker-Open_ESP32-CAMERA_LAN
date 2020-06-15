@@ -24,6 +24,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include "esp_sntp.h"
+#include "sdkconfig.h"
 
 /* FreeRTOS event group to signal when we are connected & ready to make a request */
 static EventGroupHandle_t s_wifi_event_group;
@@ -108,6 +109,7 @@ static void smartconfig_example_task(void * parm)
         }
         if(uxBits & ESPTOUCH_DONE_BIT) {
             ESP_LOGI(TAG, "smartconfig over");
+#if CONFIG_ESP_SNTP_ENABLED
             {
             initialize_sntp();
 
@@ -118,11 +120,13 @@ static void smartconfig_example_task(void * parm)
             const int retry_count = 10;
             while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
                 //ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-                vTaskDelay(2000 / portTICK_PERIOD_MS);
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
             }
+            
             time(&now);
             localtime_r(&now, &timeinfo);
             }
+#endif
             esp_smartconfig_stop();
             vTaskDelete(NULL);
         }
