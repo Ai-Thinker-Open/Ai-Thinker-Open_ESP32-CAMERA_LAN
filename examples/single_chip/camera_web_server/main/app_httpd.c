@@ -782,7 +782,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                  (detected) ? "DETECTED " : "", face_id
 #endif
         );
-        //ESP_LOGI(TAG, "Free heap: %u", xPortGetFreeHeapSize());
+        //ESP_LOGI(TAG, "Free heap: %u", xPortGetFreeHeapSize());//Memory monitoring
 
         }
 

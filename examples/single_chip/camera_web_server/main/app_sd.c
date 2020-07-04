@@ -103,14 +103,30 @@ static void Sdcard_task(void *pvParameters)
 {
 
         while (true){
-
-            //ESP_LOGW(TAG, "%d: - monitor left %dKB", __LINE__, esp_get_free_heap_size()/1024);
+           
             vTaskDelay((5*1000) / portTICK_PERIOD_MS);
         }
      vTaskDelete(NULL);
 }
 void SdCard_init(void)
 {
+#if CONFIG_ESP_SNTP_ENABLED
+    {
+    time_t now;
+    char strftime_buf[64];
+    struct tm timeinfo;
+
+    time(&now);
+    // Set timezone to China Standard Time
+    setenv("TZ", "CST-8", 1);
+    tzset();
+
+    localtime_r(&now, &timeinfo);
+    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+    }
+#endif
+#if CONFIG_ESP_SDCARD_STORAGE_ENABLED
     ESP_LOGI(TAG, "Initializing SD card");
 
 #ifndef USE_SPI_MODE
@@ -174,23 +190,6 @@ void SdCard_init(void)
 
     // Card has been initialized, print its properties
     sdmmc_card_print_info(stdout, card);
-#if CONFIG_ESP_SNTP_ENABLED
-    {
-    time_t now;
-    char strftime_buf[64];
-    struct tm timeinfo;
-
-    time(&now);
-    // Set timezone to China Standard Time
-    setenv("TZ", "CST-8", 1);
-    tzset();
-
-    localtime_r(&now, &timeinfo);
-    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
-    ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
-    }
-#endif
-#if CONFIG_ESP_SDCARD_STORAGE_ENABLED
     xTaskCreate(&Sdcard_task, "Sdcard_task", 4096, NULL, 5, NULL);
 #endif
 }

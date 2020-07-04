@@ -1,6 +1,9 @@
 # ESP-CAM
 
 ESP-CAM 是基于ESP_WHO开发的一个面部检测和识别平台，使用Espressif Systems的ESP32芯片。
+//请务必下载更新子模块，否者会编译不过缺少文件
+//参考环境：Ubuntu16.4 SDK：esp_cam IDF:esp-idf-v4.0 
+//工具链版本：xtensa-esp32-elf-gcc8_2_0-esp-2019r2-linux-amd64
 
 # 概述
 ESP32-CAM是安信可发布小尺寸的摄像头模组。该模块可以作为最小系统独立工作，尺寸仅为27*40.5*4.5mm。
