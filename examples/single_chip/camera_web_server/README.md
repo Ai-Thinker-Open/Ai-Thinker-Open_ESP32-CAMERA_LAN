@@ -4,7 +4,7 @@
 
 To run this example, you need the following components:
 
-* An ESP32 Module: Either **ESP32-WROVER-KIT** or **ESP-EYE**, which we highly recommend for beginners, is used in this example.
+* An ESP32 Module: Either **ESP32-CAM**, which we highly recommend for beginners, is used in this example.
 * A Camera Module: Either **OV2640** or **OV3660** or **OV5640** image sensor, which we highly recommend for beginners, is used in this example.
 
 # Quick Start
