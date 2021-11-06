@@ -48,7 +48,7 @@ int SCCB_Init(int pin_sda, int pin_scl)
     ESP_LOGI(TAG, "pin_sda %d pin_scl %d\n", pin_sda, pin_scl);
 #ifdef CONFIG_SCCB_HARDWARE_I2C
     //log_i("SCCB_Init start");
-    i2c_config_t conf;
+    i2c_config_t conf = {0};
     conf.mode = I2C_MODE_MASTER;
     conf.sda_io_num = pin_sda;
     conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
